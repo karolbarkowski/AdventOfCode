@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 
 namespace AdventOfCode2018
 {
@@ -8,12 +9,7 @@ namespace AdventOfCode2018
         static void Main()
         {
             var lines = File.ReadAllLines("input\\Day1.txt");
-            var result = 0;
-
-            foreach (var line in lines)
-            {
-                result += int.Parse(line);
-            }
+            var result = lines.Select(int.Parse).Sum();
 
             Console.WriteLine(result);
             Console.ReadKey();
