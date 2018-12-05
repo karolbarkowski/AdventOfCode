@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace AdventOfCode2018
 {
@@ -11,31 +8,46 @@ namespace AdventOfCode2018
     {
         private static void Main()
         {
-            var input = File.ReadAllText("input\\Day5.txt");
+            var inputList = new LinkedList<char>(File.ReadAllText("input\\Day5.txt"));
 
-            var pattern = BuildRegexPattern();
-
-            while (Regex.IsMatch(input, pattern))
+            var currentNode = inputList.First;
+            while (currentNode?.Next != null)
             {
-                input = Regex.Replace(input, pattern, "");
+                var nextNode = currentNode.Next;
+
+                if (currentNode.Value != nextNode.Value && char.ToLower(currentNode.Value) == char.ToLower(nextNode.Value))
+                {
+                    if (currentNode.Previous != null)
+                    {
+                        var previousRef = currentNode.Previous;
+                        inputList.Remove(currentNode);
+                        inputList.Remove(nextNode);
+
+                        currentNode = previousRef;
+                    }
+                    else if (nextNode.Next != null)
+                    {
+                        var nextRef = nextNode.Next;
+
+                        inputList.Remove(currentNode);
+                        inputList.Remove(nextNode);
+
+                        currentNode = nextRef;
+                    }
+                    else
+                    {
+                        inputList.Remove(currentNode);
+                        inputList.Remove(nextNode);
+                    }
+                }
+                else
+                {
+                    currentNode = currentNode.Next;
+                }
             }
 
-            Console.WriteLine(input.Length);
+            Console.WriteLine(inputList.Count);
             Console.ReadKey();
-        }
-
-        private static string BuildRegexPattern()
-        {
-            StringBuilder sbPattern = new StringBuilder();
-            for (var i = (int) 'A'; i <= 'Z'; i++)
-            {
-                var up = ((char) i).ToString();
-                var low = ((char) i).ToString().ToLower();
-
-                sbPattern.Append("(").Append(up).Append(low).Append("|").Append(low).Append(up).Append(")|");
-            }
-
-            return sbPattern.Remove(sbPattern.Length - 1, 1).ToString();
         }
     }
 }

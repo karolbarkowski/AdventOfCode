@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace AdventOfCode2018
 {
@@ -11,45 +10,70 @@ namespace AdventOfCode2018
     {
         private static void Main()
         {
-            var input = File.ReadAllText("input\\Day5.txt");
-            var globalPattern = BuildGlobalPattern();
-
             var results = new Dictionary<char, int>();
-            for (var i = (int)'A'; i <= 'Z'; i++)
+            for (var i = (int) 'A'; i <= 'Z'; i++)
             {
-                var up = ((char)i).ToString();
-                var low = ((char)i).ToString().ToLower();
+                var low = char.ToLower((char) i).ToString();
+                var up = ((char) i).ToString();
 
-                var groupPattern = $"[{low}{up}]";
-                var inputShortened = Regex.Replace(input, groupPattern, "");
+                var inputList = CollapsePolymer(low, up);
 
-                while (Regex.IsMatch(inputShortened, globalPattern))
-                {
-                    inputShortened = Regex.Replace(inputShortened, globalPattern, "");
-                }
-
-                results.Add((char)i, inputShortened.Length);
+                results.Add((char) i, inputList.Count);
             }
 
             foreach (var r in results)
             {
                 Console.WriteLine($"{r.Key} - {r.Value}");
             }
+
+            Console.WriteLine($"Minimum: {results.Min(r => r.Value)}");
             Console.ReadKey();
         }
 
-        private static string BuildGlobalPattern()
+        private static LinkedList<char> CollapsePolymer(string charLow, string charUp)
         {
-            StringBuilder sbPattern = new StringBuilder();
-            for (var i = (int)'A'; i <= 'Z'; i++)
-            {
-                var up = ((char)i).ToString();
-                var low = ((char)i).ToString().ToLower();
+            StringBuilder input = new StringBuilder(File.ReadAllText("input\\Day5.txt"));
+            input = input.Replace(charLow, "").Replace(charUp, "");
+            var inputList = new LinkedList<char>(input.ToString());
 
-                sbPattern.Append("(").Append(up).Append(low).Append("|").Append(low).Append(up).Append(")|");
+            var currentNode = inputList.First;
+            while (currentNode?.Next != null)
+            {
+                var nextNode = currentNode.Next;
+
+                if (currentNode.Value != nextNode.Value &&
+                    char.ToLower(currentNode.Value) == char.ToLower(nextNode.Value))
+                {
+                    if (currentNode.Previous != null)
+                    {
+                        var previousRef = currentNode.Previous;
+                        inputList.Remove(currentNode);
+                        inputList.Remove(nextNode);
+
+                        currentNode = previousRef;
+                    }
+                    else if (nextNode.Next != null)
+                    {
+                        var nextRef = nextNode.Next;
+
+                        inputList.Remove(currentNode);
+                        inputList.Remove(nextNode);
+
+                        currentNode = nextRef;
+                    }
+                    else
+                    {
+                        inputList.Remove(currentNode);
+                        inputList.Remove(nextNode);
+                    }
+                }
+                else
+                {
+                    currentNode = currentNode.Next;
+                }
             }
 
-            return sbPattern.Remove(sbPattern.Length - 1, 1).ToString();
+            return inputList;
         }
     }
 }
