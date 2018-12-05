@@ -14,36 +14,17 @@ namespace AdventOfCode2018
             while (currentNode?.Next != null)
             {
                 var nextNode = currentNode.Next;
+                var refForNextIteration = currentNode.Next;
 
-                if (currentNode.Value != nextNode.Value && char.ToLower(currentNode.Value) == char.ToLower(nextNode.Value))
+                if (currentNode.Value != nextNode.Value &&
+                    char.ToLower(currentNode.Value) == char.ToLower(nextNode.Value))
                 {
-                    if (currentNode.Previous != null)
-                    {
-                        var previousRef = currentNode.Previous;
-                        inputList.Remove(currentNode);
-                        inputList.Remove(nextNode);
-
-                        currentNode = previousRef;
-                    }
-                    else if (nextNode.Next != null)
-                    {
-                        var nextRef = nextNode.Next;
-
-                        inputList.Remove(currentNode);
-                        inputList.Remove(nextNode);
-
-                        currentNode = nextRef;
-                    }
-                    else
-                    {
-                        inputList.Remove(currentNode);
-                        inputList.Remove(nextNode);
-                    }
+                    refForNextIteration = currentNode.Previous ?? nextNode.Next;
+                    inputList.Remove(currentNode);
+                    inputList.Remove(nextNode);
                 }
-                else
-                {
-                    currentNode = currentNode.Next;
-                }
+
+                currentNode = refForNextIteration;
             }
 
             Console.WriteLine(inputList.Count);
