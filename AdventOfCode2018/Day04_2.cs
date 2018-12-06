@@ -24,12 +24,10 @@ namespace AdventOfCode2018
         public Guard(int id)
         {
             Id = id;
-            minutesBreakdown = new Dictionary<int, int>();
         }
 
         public int Id { get; set; }
         public int TotalMinutesAsleep { get; set; }
-        public Dictionary<int, int> minutesBreakdown { get; set; }
     }
 
 
@@ -38,55 +36,37 @@ namespace AdventOfCode2018
     {
         private static void Main()
         {
-            var lines = File.ReadAllLines("input\\Day4.txt");
-
-            List<Input> inputs = ReadInput(lines);
-            Dictionary<int, Guard> guards = new Dictionary<int, Guard>();
-            Guard currentGuard = null;
-
+            var inputs = ReadInput(File.ReadAllLines("input\\Day4.txt"));
+            var minutes = new Dictionary<string, int>();    //minute#guardId, totalSleepTime
+           
+            var currentGuardId = inputs.First().Id.Value;
             for (var i = 0; i < inputs.Count - 1; i++)
             {
                 var currentInput = inputs[i];
-                var nextInput = inputs[i + 1];
+                currentGuardId = currentInput.Id.HasValue ? currentInput.Id.Value : currentGuardId;
 
-                if (currentInput.Activity == Actions.Begins)
+                if (currentInput.Activity != Actions.FallsAsleep) continue;
+
+                for (var j = currentInput.Date.Minute; j < inputs[i + 1].Date.Minute; j++)
                 {
-                    if (guards.ContainsKey(currentInput.Id.Value))
+                    var key = $"{j}#{currentGuardId}";
+
+                    if (minutes.ContainsKey(key))
                     {
-                        currentGuard = guards[currentInput.Id.Value];
+                        minutes[key]++;
                     }
                     else
                     {
-                        currentGuard = new Guard(currentInput.Id.Value);
-                        guards.Add(currentGuard.Id, currentGuard);
-                    }
-                }
-
-
-
-                if (currentInput.Activity == Actions.FallsAsleep)
-                {
-                    TimeSpan sleepTime = nextInput.Date - currentInput.Date;
-                    currentGuard.TotalMinutesAsleep += sleepTime.Minutes;
-
-                    for (int j = currentInput.Date.Minute; j < nextInput.Date.Minute; j++)
-                    {
-                        if (currentGuard.minutesBreakdown.ContainsKey(j))
-                        {
-                            currentGuard.minutesBreakdown[j]++;
-                        }
-                        else
-                        {
-                            currentGuard.minutesBreakdown.Add(j, 1);
-                        }
+                        minutes.Add(key, 1);
                     }
                 }
             }
 
-            var ordered = guards.OrderByDescending(g => g.Value.TotalMinutesAsleep).ToList();
-            var sleepyGuard = ordered.First();
-            var id = sleepyGuard.Value.Id;
-            var minute = sleepyGuard.Value.minutesBreakdown.OrderByDescending(m => m.Value).First().Key;
+            var maxEntry = minutes.OrderByDescending(m => m.Value).First();
+
+            var data = maxEntry.Key.Split('#');
+            var minute = int.Parse(data[0]);
+            var id = int.Parse(data[1]);
 
             var result = id * minute;
 
@@ -94,7 +74,7 @@ namespace AdventOfCode2018
             Console.ReadKey();
         }
 
-        private static List<Input> ReadInput(string[] lines)
+        private static List<Input> ReadInput(IEnumerable<string> lines)
         {
             var input = new List<Input>();
             foreach (var line in lines)
