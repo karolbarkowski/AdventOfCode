@@ -93,29 +93,32 @@ namespace AdventOfCode2018
 
         private static List<Input> ReadInput(string[] lines)
         {
-            List<Input> input = new List<Input>();
+            var input = new List<Input>();
             foreach (var line in lines)
             {
-                DateTime date = DateTime.Parse(line.Substring(0, 19).Replace("[", "").Replace("]", ""));
-                string activity = line.Substring(19, line.Length - 19);
+                var date = DateTime.Parse(line.Substring(0, 19).Replace("[", "").Replace("]", ""));
+                var activity = line.Substring(19, line.Length - 19);
 
-                Actions? activityParsed = null;
+                Actions activityParsed;
                 int? id = null;
-                if (activity == "falls asleep")
-                    activityParsed = Actions.FallsAsleep;
-                if (activity == "wakes up")
-                    activityParsed = Actions.WakesUp;
-                if (activity.Contains("begins shift"))
+                switch (activity)
                 {
-                    activityParsed = Actions.Begins;
-                    id = int.Parse(activity.Split(new[] {' '})[1].Replace("#", ""));
+                    case "falls asleep":
+                        activityParsed = Actions.FallsAsleep;
+                        break;
+                    case "wakes up":
+                        activityParsed = Actions.WakesUp;
+                        break;
+                    default:
+                        activityParsed = Actions.Begins;
+                        id = int.Parse(activity.Split(new[] {' '})[1].Replace("#", ""));
+                        break;
                 }
 
-                input.Add(new Input() {Id = id, Date = date, Activity = activityParsed.Value});
+                input.Add(new Input() {Id = id, Date = date, Activity = activityParsed});
             }
 
-            input = input.OrderBy(i => i.Date).ToList();
-            return input;
+            return input.OrderBy(i => i.Date).ToList();
         }
     }
 }
