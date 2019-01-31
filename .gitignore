@@ -16,7 +16,7 @@ local.properties
 .classpath
 .settings/
 .loadpath
-.DotSettings.user
+*.DotSettings.user
 
 # External tool builders
 .externalToolBuilders/

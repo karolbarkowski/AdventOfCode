@@ -6,9 +6,11 @@ using System.Text;
 
 namespace AdventOfCode2018
 {
+
     internal class Node
     {
         public string Name { get; set; }
+        public int TimeNeeded { get; set; }
         public Dictionary<string, Node> Next { get; set; }
         public Dictionary<string, Node> Previous { get; set; }
 
@@ -17,6 +19,7 @@ namespace AdventOfCode2018
             Name = name;
             Next = new Dictionary<string, Node>();
             Previous = new Dictionary<string, Node>();
+            TimeNeeded = (char) name.First() - 64;
         }
     }
 
@@ -28,38 +31,41 @@ namespace AdventOfCode2018
             var resultLength = nodesRef.Count;
 
             //get the first node, the one that doesn't have any previous nodes
-            var firstNodes = nodesRef.Where(n => n.Value.Previous.Count == 0).OrderBy(n => n.Key);
-            var nodePointer = firstNodes.First();
+            var availableNodes = nodesRef.Where(n => n.Value.Previous.Count == 0).OrderBy(n => n.Key).ToDictionary(n => n.Key, n=>  n.Value);
+            const int workers = 2;
 
-            var availableNodes = new Dictionary<string, Node>(nodePointer.Value.Next);
-            foreach (var n in firstNodes.Skip(1))
+            for (var i = 0; i < workers; i++)
             {
-                availableNodes.Add(n.Key, n.Value);
+                if (availableNodes.Count == 0)
+                    break;
+
+                availableNodes[i].TimeNeeded--;
+
             }
             
-            var result = new StringBuilder(nodePointer.Key);
+        //    var result = new StringBuilder(nodePointer.Key);
 
-            RemoveNode(nodePointer, nodesRef);
+            //RemoveNode(nodePointer, nodesRef);
 
-            while (result.Length < resultLength)
-            {
-                nodePointer = availableNodes.OrderBy(n => n.Value.Name).First();
-                result.Append(nodePointer.Value.Name);
+            //while (result.Length < resultLength)
+            //{
+            //    nodePointer = availableNodes.OrderBy(n => n.Value.Name).First();
+            //    result.Append(nodePointer.Value.Name);
 
-                availableNodes.Remove(nodePointer.Key);
-                RemoveNode(nodePointer, nodesRef);
+            //    availableNodes.Remove(nodePointer.Key);
+            //    RemoveNode(nodePointer, nodesRef);
 
-                var newAvailable = nodePointer.Value.Next.Where(n => n.Value.Previous.Count == 0).ToList();
-                foreach (var n in newAvailable)
-                {
-                    if (!availableNodes.ContainsKey(n.Key))
-                    {
-                        availableNodes.Add(n.Key, n.Value);
-                    }
-                }
-            }
+            //    var newAvailable = nodePointer.Value.Next.Where(n => n.Value.Previous.Count == 0).ToList();
+            //    foreach (var n in newAvailable)
+            //    {
+            //        if (!availableNodes.ContainsKey(n.Key))
+            //        {
+            //            availableNodes.Add(n.Key, n.Value);
+            //        }
+            //    }
+            //}
 
-            Console.WriteLine(result);
+           //Console.WriteLine(result);
             Console.ReadKey();
         }
 
